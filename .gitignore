@@ -1,12 +1,8 @@
-# Pd backup / autosave files
-*.pd~
-*.pd.backup
-
-# Large audio assets
+synthdefs/
+*.scsyndef
 samples/*
 !samples/.gitkeep
-
-# OS / editor cruft
 .DS_Store
+*.swp
 .vscode/
 .idea/
