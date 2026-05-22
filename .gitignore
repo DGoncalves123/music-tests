@@ -1,0 +1,12 @@
+# Pd backup / autosave files
+*.pd~
+*.pd.backup
+
+# Large audio assets
+samples/*
+!samples/.gitkeep
+
+# OS / editor cruft
+.DS_Store
+.vscode/
+.idea/
