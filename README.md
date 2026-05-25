@@ -1,82 +1,109 @@
 # music-tests
 
-A SuperCollider workspace organized around two activities:
+A SuperCollider workspace split into three panels, each with a single job.
 
-1. **Designing rhythms** — a pulse network where you decide *when* things fire.
-2. **Designing voices** — per-instrument files where you decide *what* each
-   trigger sounds like, in isolation.
-
-Each voice can be muted, soloed, retuned, or rebuilt without stopping the
-others. The rhythm file and the voices talk through named `Pdef`s and shared
-SynthDefs.
-
-## Install (macOS)
+## Install
 
 ```sh
 brew install --cask --appdir=~/Applications supercollider
 ```
 
-## Workflow
+VS Code extension: Cmd+Shift+X → search **supercollider** → install **mozochrome.supercollider**.
 
-### 1. Boot once
+---
 
-Open `startup.scd` and evaluate the whole file (Cmd+A, Cmd+Return).
-This boots the audio server, loads every SynthDef in `instruments/`, and
-defines the master tempo clock.
+## 3-panel layout
 
-### 2. Design rhythms in `rhythm/network.scd`
-
-This is your "pulse network" view: master tempo, division streams, AND
-coincidence, Bernoulli probability, and the `Pdef`s that route triggers
-to each voice. Evaluate parenthesized blocks to load/update the patterns.
-Patterns hot-swap — change something and re-evaluate, no need to stop.
-
-Mute / solo individual voices from there:
-```supercollider
-Pdef(\kick).stop;        // mute one
-Pdef(\kick).play;        // unmute
-~mute.(\kick);           // helper if you prefer
-~solo.(\hat);            // solo one (mutes all others)
-~unsolo.();              // back to normal
-```
-
-### 3. Design a single voice in `voices/<name>.scd`
-
-Each voice file is self-contained. Open `voices/kick.scd` and you'll see:
-
-- A **SynthDef** for the sound (the "instrument template").
-- A small **playground** block — trigger the voice in isolation while you tweak
-  oscillators, envelopes, filters. Cmd+Return on individual lines to fire it.
-- Once the SynthDef is reloaded (`.add`), the rhythm in `rhythm/network.scd`
-  immediately uses the new version on the next trigger. No restart needed.
-
-This means you can have `network.scd` running in one tab, `voices/kick.scd`
-open in another, and shape the kick while the groove keeps playing.
-
-### 4. Free experimentation
-
-`live/scratch.scd` is a notebook for one-off ideas, sketches, and tests.
-
-## Layout
+Set this up once, then VS Code remembers it.
 
 ```
-startup.scd          boot server, load instruments, define helpers + tempo clock
-instruments/         SynthDefs (one file per voice — the reusable "templates")
-rhythm/network.scd   the pulse-network: tempo, divisions, AND, Bernoulli, Pdefs
-voices/              per-voice playgrounds (isolated tweaking + soloing)
-live/scratch.scd     free experimentation
-samples/             audio files (gitignored)
+┌─────────────────────┬──────────────────────┬─────────────────────┐
+│   LEFT              │   MIDDLE             │   RIGHT             │
+│   rhythm/           │   utilities/         │   voices/           │
+│   network.scd       │   control.scd        │   <name>.scd        │
+│                     │                      │                     │
+│  Design WHEN        │  Operate the system  │  Design WHAT        │
+│  things fire        │  while it runs       │  each voice sounds  │
+│                     │                      │                     │
+│  • Pbind patterns   │  • freeze / thaw     │  • SynthDef         │
+│  • durations        │  • mute / solo       │  • one-shot tests   │
+│  • probabilities    │  • tempo             │  • parameter tweaks │
+│  • pitch sequences  │  • stop / restart    │                     │
+└─────────────────────┴──────────────────────┴─────────────────────┘
+                              ↑
+                        post window
+                        (bottom panel)
 ```
 
-## Cheatsheet
+**To open the layout:**
+1. Open VS Code with this folder.
+2. Open `rhythm/network.scd` — drag it to the **left** column.
+3. Open `utilities/control.scd` — drag it to the **centre** column.
+4. Open any `voices/<name>.scd` — drag it to the **right** column.
+5. Open `startup.scd` anywhere (or as a 4th tab) — run it once then close/minimise.
 
-| Action                          | Mac          |
-|---------------------------------|--------------|
-| Evaluate line / selection / block | Cmd+Return |
-| Stop ALL sound (panic)          | Cmd+.        |
-| Help for word under cursor      | Cmd+D        |
-| Boot server                     | run `startup.scd` |
-| Stop one voice                  | `Pdef(\name).stop;` |
-| Play one voice                  | `Pdef(\name).play;` |
-| Solo one voice                  | `~solo.(\name);`   |
-| Clear solo                      | `~unsolo.();`      |
+VS Code tip: View → Editor Layout → Three Columns sets up the columns in one step.
+
+---
+
+## Session workflow
+
+### 1. Boot (once per session)
+Open `startup.scd`. Cmd+A, Cmd+Enter. Wait for "Ready" in the post window.
+
+### 2. Start the rhythm (left panel)
+In `network.scd`, Cmd+Enter inside each `( )` block top to bottom.
+Each block starts one voice. Re-evaluate any block anytime to hot-swap it.
+
+### 3. Control the network (middle panel)
+Single lines — put cursor on a line, Cmd+Enter to fire it:
+- `~freeze.(\kick)` — locks kick on its last 8 steps at the next bar
+- `~freezeAll.()` — locks everything at once
+- `~thaw.(\kick)` — releases it back to evolving
+- `~solo.(\hat)` — solo one voice
+- `~kickProb = 0.3` + Cmd+Enter — make kick sparse
+
+### 4. Shape a sound (right panel)
+Open a voice file. Edit its SynthDef, Cmd+Enter on the `( )` block to reload.
+The running rhythm picks up the new sound immediately — no restart.
+Use the commented playground lines below the SynthDef to fire one-shots.
+
+### 5. Stop
+- `Cmd+.` — panic, stops everything
+- `(~voices.do({ |v| Pdef(v).stop });)` in control.scd — graceful stop
+
+---
+
+## File layout
+
+```
+startup.scd              boot + all infrastructure (freeze, mute, solo helpers)
+rhythm/
+  network.scd            LEFT panel — pattern design only
+utilities/
+  control.scd            MIDDLE panel — operational controls only
+voices/
+  kick.scd               RIGHT panel — swap these out per voice
+  thump.scd
+  blip.scd
+  hat.scd
+  ping.scd
+instruments/             SynthDefs loaded at boot (one file per voice)
+live/scratch.scd         free experimentation
+samples/                 audio files (gitignored)
+```
+
+---
+
+## Quick reference
+
+| What                        | How                                      |
+|-----------------------------|------------------------------------------|
+| Evaluate block              | Cmd+Enter inside `( )`                   |
+| Evaluate single line        | Cmd+Enter on the line                    |
+| Panic / stop all sound      | Cmd+.                                    |
+| Freeze voice at next bar    | `~freeze.(\name);` in middle panel       |
+| Thaw voice                  | `~thaw.(\name);` in middle panel         |
+| Solo                        | `~solo.(\name);` / `~unsolo.();`         |
+| Change tempo                | `TempoClock.default.tempo = 130/60;`     |
+| Reload a SynthDef           | Cmd+Enter on the SynthDef `( )` block    |
