@@ -1,4 +1,5 @@
-// voices/thump.scd — design the THUMP in isolation.
+// voices/voice2.scd — SLOT 2 — thump
+// Edit the SynthDef, Cmd+Enter on the block to hot-swap it while rhythm runs.
 
 (
 SynthDef(\thump, { |out = 0, amp = 0.4, pan = 0, freq = 70, rel = 0.2|
@@ -8,6 +9,7 @@ SynthDef(\thump, { |out = 0, amp = 0.4, pan = 0, freq = 70, rel = 0.2|
     sig = sig * env * amp;
     Out.ar(out, Pan2.ar(sig, pan));
 }).add;
+"thump loaded".postln;
 )
 
 // Synth(\thump);

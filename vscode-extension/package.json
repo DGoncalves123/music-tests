@@ -1,21 +1,55 @@
 {
   "name": "sc-hover-docs",
-  "displayName": "SuperCollider Hover Docs",
-  "description": "Hover documentation for SuperCollider classes — instant, offline, parsed from .schelp files.",
-  "version": "0.1.0",
+  "displayName": "SuperCollider Tools",
+  "description": "Hover docs, variable info, autocomplete, server control and eval for SuperCollider.",
+  "version": "0.2.0",
   "publisher": "local",
   "engines": { "vscode": "^1.80.0" },
   "categories": ["Programming Languages"],
   "activationEvents": ["onLanguage:supercollider"],
   "main": "./out/extension.js",
   "contributes": {
+    "commands": [
+      { "command": "sc.toggleServer", "title": "SuperCollider: Start/Stop Server" },
+      { "command": "sc.startServer",  "title": "SuperCollider: Start Server" },
+      { "command": "sc.stopServer",   "title": "SuperCollider: Stop Server" },
+      { "command": "sc.evalBlock",    "title": "SuperCollider: Evaluate Block" },
+      { "command": "sc.stopSound",    "title": "SuperCollider: Stop All Sound" },
+      { "command": "sc.showOutput",   "title": "SuperCollider: Show Output" },
+      { "command": "sc.loadFile",     "title": "SuperCollider: Load Current File" }
+    ],
+    "keybindings": [
+      {
+        "command": "sc.evalBlock",
+        "key": "ctrl+enter",
+        "mac": "cmd+enter",
+        "when": "editorTextFocus && resourceLangId == supercollider"
+      },
+      {
+        "command": "sc.stopSound",
+        "key": "ctrl+.",
+        "mac": "cmd+.",
+        "when": "editorTextFocus && resourceLangId == supercollider"
+      },
+      {
+        "command": "sc.loadFile",
+        "key": "ctrl+shift+enter",
+        "mac": "cmd+shift+enter",
+        "when": "editorTextFocus && resourceLangId == supercollider"
+      }
+    ],
     "configuration": {
-      "title": "SC Hover Docs",
+      "title": "SuperCollider Tools",
       "properties": {
+        "supercollider.sclang.cmd": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the sclang executable."
+        },
         "scHoverDocs.scHelpSourcePath": {
           "type": "string",
           "default": "",
-          "description": "Path to SuperCollider's HelpSource directory (optional — used by the doc builder script, not needed at runtime)."
+          "description": "Path to HelpSource (used by the doc builder script only)."
         }
       }
     }

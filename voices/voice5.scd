@@ -1,4 +1,5 @@
-// voices/ping.scd — design the PING in isolation.
+// voices/voice5.scd — SLOT 5 — ping
+// Edit the SynthDef, Cmd+Enter on the block to hot-swap it while rhythm runs.
 
 (
 SynthDef(\ping, { |out = 0, amp = 0.3, pan = 0, freq = 440, rel = 0.3|
@@ -8,8 +9,9 @@ SynthDef(\ping, { |out = 0, amp = 0.3, pan = 0, freq = 440, rel = 0.3|
     sig = sig * env * amp;
     Out.ar(out, Pan2.ar(sig, pan));
 }).add;
+"ping loaded".postln;
 )
 
 // Synth(\ping);
 // Synth(\ping, [\freq, 660, \rel, 0.6]);
-// Synth(\ping, [\freq, 220, \rel, 1.2]);  // bell-ish
+// Synth(\ping, [\freq, 220, \rel, 1.2]);

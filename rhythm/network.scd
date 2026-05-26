@@ -3,13 +3,13 @@
 // Design when things fire. Evaluate blocks top to bottom to start the network.
 // Hot-swap any block mid-session: change values, Cmd+Enter inside the ( ), done.
 // All controls (freeze, mute, tempo) are in utilities/control.scd (middle panel).
+// Slots: voice1=kick  voice2=thump  voice3=blip  voice4=hat  voice5=ping
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Tempo ────────────────────────────────────────────────────────────────────
-// Re-evaluate this line alone anytime to change BPM while running.
 (TempoClock.default.tempo = 120/60;)
 
-// ── ÷2 THUMP — half-note grid ────────────────────────────────────────────────
+// ── THUMP — half-note grid ────────────────────────────────────────────────────
 (
 ~live[\thump] = {
     Pbind(
@@ -28,7 +28,7 @@ Pdef(\thump, ~live[\thump].value).play;
 "[rhythm] thump loaded".postln;
 )
 
-// ── ÷3 BLIP — 3-against grid ─────────────────────────────────────────────────
+// ── BLIP — 3-against grid ─────────────────────────────────────────────────────
 (
 ~live[\blip] = {
     Pbind(
@@ -48,7 +48,7 @@ Pdef(\blip, ~live[\blip].value).play;
 "[rhythm] blip loaded".postln;
 )
 
-// ── ÷4 KICK — Bernoulli probability ──────────────────────────────────────────
+// ── KICK — Bernoulli probability ──────────────────────────────────────────────
 // Change ~kickProb in utilities/control.scd, or change it here and re-evaluate.
 (
 ~kickProb = 0.7;
@@ -68,7 +68,7 @@ Pdef(\kick, ~live[\kick].value).play;
 "[rhythm] kick loaded".postln;
 )
 
-// ── ÷8 HAT — 16th-note ticks ─────────────────────────────────────────────────
+// ── HAT — 16th-note ticks ─────────────────────────────────────────────────────
 (
 ~live[\hat] = {
     Pbind(
@@ -89,7 +89,7 @@ Pdef(\hat, ~live[\hat].value).play;
 "[rhythm] hat loaded".postln;
 )
 
-// ── AND PING — sparse coincidence ────────────────────────────────────────────
+// ── PING — sparse coincidence ─────────────────────────────────────────────────
 (
 ~live[\ping] = {
     Pbind(

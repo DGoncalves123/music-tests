@@ -1,4 +1,5 @@
-// voices/blip.scd — design the BLIP in isolation.
+// voices/voice3.scd — SLOT 3 — blip
+// Edit the SynthDef, Cmd+Enter on the block to hot-swap it while rhythm runs.
 
 (
 SynthDef(\blip, { |out = 0, amp = 0.3, pan = 0, freq = 320, rel = 0.09, cutoff = 2400|
@@ -9,6 +10,7 @@ SynthDef(\blip, { |out = 0, amp = 0.3, pan = 0, freq = 320, rel = 0.09, cutoff =
     sig = sig * env * amp;
     Out.ar(out, Pan2.ar(sig, pan));
 }).add;
+"blip loaded".postln;
 )
 
 // Synth(\blip);

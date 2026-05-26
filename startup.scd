@@ -1,36 +1,32 @@
-// startup.scd — run this once at the start of every session.
-// Cmd+A, Cmd+Enter. Watch the post window for "Ready."
-//
-// What this does:
-//   1. Boots the audio server
-//   2. Loads every SynthDef in instruments/
-//   3. Defines the freeze/thaw/mute/solo infrastructure
-//   4. Sets the master tempo clock
-//
-// After this: open the 3-panel layout (see README) and start with network.scd.
+// startup.scd — run once per session.
+// Cmd+Shift+Enter (Load File) or Cmd+A → Cmd+Enter.
+// Watch the post window for "Ready."
 
 (
 s.waitForBoot({
-    var root = thisProcess.nowExecutingPath.dirname;
-    var n = 8;  // circular buffer size per voice (steps captured for freeze)
+    var root = thisProcess.nowExecutingPath !? { |p| p.dirname }
+               ?? { "/Users/diogo.costa/Documents/music-tests" };
+    var n = 8;
 
-    // ── Load SynthDefs ───────────────────────────────────────────────────
-    PathName(root +/+ "instruments").files.do({ |f|
-        if(f.extension == "scd", {
+    ("project root: " ++ root).postln;
+
+    // ── Load all voices (SynthDefs) ──────────────────────────────────────
+    PathName(root +/+ "voices").files.do({ |f|
+        if(f.extension == "scd" && { f.fileNameWithoutExtension != "template" }, {
             ("loading: " ++ f.fileName).postln;
             f.fullPath.load;
         });
     });
     s.sync;
 
-    // ── Voice list ───────────────────────────────────────────────────────
+    // ── Voice slot list — add new slots here when you add voiceN.scd ────
     ~voices = [\kick, \thump, \blip, \hat, \ping];
 
     // ── Freeze infrastructure ────────────────────────────────────────────
     ~buf      = Dictionary.new;
     ~live     = Dictionary.new;
     ~isFrozen = Dictionary.new;
-    ~freezeQuant = 1;  // bars — change in utilities/control.scd
+    ~freezeQuant = 1;
 
     ~push = { |name, dict|
         var b = ~buf.at(name.asSymbol);
@@ -44,8 +40,7 @@ s.waitForBoot({
         if(~isFrozen.at(name.asSymbol) == true, {
             (name ++ " already frozen").postln;
         }, {
-            var beatsPerBar = TempoClock.default.beatsPerBar;
-            var quantBeats  = ~freezeQuant * beatsPerBar;
+            var quantBeats = ~freezeQuant * TempoClock.default.beatsPerBar;
             TempoClock.default.schedAbs(
                 TempoClock.default.nextTimeOnGrid(quantBeats),
                 {
@@ -72,8 +67,7 @@ s.waitForBoot({
         if(fn.isNil, {
             ("thaw: no live fn for " ++ name).postln;
         }, {
-            var beatsPerBar = TempoClock.default.beatsPerBar;
-            var quantBeats  = ~freezeQuant * beatsPerBar;
+            var quantBeats = ~freezeQuant * TempoClock.default.beatsPerBar;
             TempoClock.default.schedAbs(
                 TempoClock.default.nextTimeOnGrid(quantBeats),
                 {
@@ -93,22 +87,22 @@ s.waitForBoot({
     // ── Mute / solo ──────────────────────────────────────────────────────
     ~mute   = { |name| Pdef(name).stop;  ("muted: "   ++ name).postln };
     ~unmute = { |name| Pdef(name).play;  ("unmuted: " ++ name).postln };
-
-    ~solo = { |name|
+    ~solo   = { |name|
         ~voices.do({ |v| if(v != name, { Pdef(v).stop }) });
         Pdef(name).play;
         ("solo: " ++ name).postln;
     };
     ~unsolo = { ~voices.do({ |v| Pdef(v).play }); "all voices on".postln };
 
-    // ── Master tempo ─────────────────────────────────────────────────────
+    // ── Tempo ────────────────────────────────────────────────────────────
     TempoClock.default.tempo = 120/60;
 
     "".postln;
-    "── Ready ──────────────────────────────────────────────────────".postln;
-    "  Left   → rhythm/network.scd    (pattern design)".postln;
-    "  Middle → utilities/control.scd (freeze / mute / tempo)".postln;
-    "  Right  → voices/<name>.scd     (sound design)".postln;
-    "────────────────────────────────────────────────────────────────".postln;
+    "── Ready ──────────────────────────────────────────────────────────".postln;
+    "  Left   →  rhythm/network.scd       pattern design".postln;
+    "  Middle →  utilities/control.scd    freeze / mute / tempo".postln;
+    "  Right  →  voices/voiceN.scd        sound design per slot".postln;
+    "  Voices →  voice1..voice5  (add more in voices/ + ~voices list)".postln;
+    "───────────────────────────────────────────────────────────────────".postln;
 });
 )
