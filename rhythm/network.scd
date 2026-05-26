@@ -9,7 +9,62 @@
 // ── Tempo ────────────────────────────────────────────────────────────────────
 (TempoClock.default.tempo = 120/60;)
 
-// ── THUMP — half-note grid ────────────────────────────────────────────────────
+
+// ══════════════════════════════════════════════════════════════════════════════
+// KICK  (voice1)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// -- Bernoulli probability (default) ------------------------------------------
+(
+~kickProb = 0.7;
+~live[\kick] = {
+    Pbind(
+        \instrument, \kick,
+        \dur, 1,
+        \freq, 55,
+        \amp, Pfunc({
+            var a = if(1.0.rand < ~kickProb, { 0.7 }, { 0 });
+            ~push.(\kick, (instrument: \kick, dur: 1, freq: 55, amp: a));
+            a
+        }),
+    )
+};
+Pdef(\kick, ~live[\kick].value).play;
+"[rhythm] kick loaded".postln;
+)
+
+// -- Four-on-the-floor --------------------------------------------------------
+// (
+// ~live[\kick] = {
+//     Pbind(
+//         \instrument, \kick,
+//         \dur, 1,
+//         \freq, 55,
+//         \amp, 0.7,
+//     )
+// };
+// Pdef(\kick, ~live[\kick].value).play;
+// )
+
+// -- Euclidean (5 hits in 8 steps) --------------------------------------------
+// (
+// ~live[\kick] = {
+//     var hits = Bjorklund(5, 8);   // [1,0,1,0,1,0,1,0,...] — requires JITLib
+//     Pbind(
+//         \instrument, \kick,
+//         \dur, 0.5,
+//         \amp, Pseq(hits.collect({ |h| h * 0.7 }), inf),
+//     )
+// };
+// Pdef(\kick, ~live[\kick].value).play;
+// )
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// THUMP  (voice2)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// -- Wandering half-note grid (default) ---------------------------------------
 (
 ~live[\thump] = {
     Pbind(
@@ -28,7 +83,40 @@ Pdef(\thump, ~live[\thump].value).play;
 "[rhythm] thump loaded".postln;
 )
 
-// ── BLIP — 3-against grid ─────────────────────────────────────────────────────
+// -- Steady half-notes --------------------------------------------------------
+// (
+// ~live[\thump] = {
+//     Pbind(
+//         \instrument, \thump,
+//         \dur, 2,
+//         \freq, 70,
+//         \amp,  0.4,
+//         \rel,  0.3,
+//     )
+// };
+// Pdef(\thump, ~live[\thump].value).play;
+// )
+
+// -- Pitched sequence (bassline-ish) ------------------------------------------
+// (
+// ~live[\thump] = {
+//     Pbind(
+//         \instrument, \thump,
+//         \dur, Pseq(#[1, 1, 0.5, 0.5], inf),
+//         \freq, Pseq(#[55, 55, 70, 82], inf),
+//         \amp,  0.45,
+//         \rel,  0.25,
+//     )
+// };
+// Pdef(\thump, ~live[\thump].value).play;
+// )
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// BLIP  (voice3)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// -- 3-against grid, random pitch (default) -----------------------------------
 (
 ~live[\blip] = {
     Pbind(
@@ -48,27 +136,44 @@ Pdef(\blip, ~live[\blip].value).play;
 "[rhythm] blip loaded".postln;
 )
 
-// ── KICK — Bernoulli probability ──────────────────────────────────────────────
-// Change ~kickProb in utilities/control.scd, or change it here and re-evaluate.
-(
-~kickProb = 0.7;
-~live[\kick] = {
-    Pbind(
-        \instrument, \kick,
-        \dur, 1,
-        \freq, 55,
-        \amp, Pfunc({
-            var a = if(1.0.rand < ~kickProb, { 0.7 }, { 0 });
-            ~push.(\kick, (instrument: \kick, dur: 1, freq: 55, amp: a));
-            a
-        }),
-    )
-};
-Pdef(\kick, ~live[\kick].value).play;
-"[rhythm] kick loaded".postln;
-)
+// -- Steady 8th-notes, fixed pitch --------------------------------------------
+// (
+// ~live[\blip] = {
+//     Pbind(
+//         \instrument, \blip,
+//         \dur, 0.5,
+//         \freq, 320,
+//         \cutoff, 2000,
+//         \amp, 0.25,
+//     )
+// };
+// Pdef(\blip, ~live[\blip].value).play;
+// )
 
-// ── HAT — 16th-note ticks ─────────────────────────────────────────────────────
+// -- Random bursts (density controlled) --------------------------------------
+// (
+// ~blipDensity = 0.5;   // 0.0–1.0
+// ~live[\blip] = {
+//     Pbind(
+//         \instrument, \blip,
+//         \dur, Pfunc({
+//             var d = if(1.0.rand < ~blipDensity, { 0.25 }, { 0.75 });
+//             ~push.(\blip, (instrument: \blip, dur: d, freq: #[280,320,380,420].choose, amp: 0.3));
+//             d
+//         }),
+//         \freq, Pwhite(200, 500),
+//         \amp, 0.3,
+//     )
+// };
+// Pdef(\blip, ~live[\blip].value).play;
+// )
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// HAT  (voice4)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// -- 16th-note shuffle with velocity accents (default) ------------------------
 (
 ~live[\hat] = {
     Pbind(
@@ -89,7 +194,44 @@ Pdef(\hat, ~live[\hat].value).play;
 "[rhythm] hat loaded".postln;
 )
 
-// ── PING — sparse coincidence ─────────────────────────────────────────────────
+// -- Straight 8ths, open feel -------------------------------------------------
+// (
+// ~live[\hat] = {
+//     Pbind(
+//         \instrument, \hat,
+//         \dur, 0.5,
+//         \amp, Pseq(#[0.2, 0.1, 0.2, 0.1, 0.2, 0.1, 0.2, 0.1], inf),
+//         \rel, 0.12,
+//         \hp,  6000,
+//     )
+// };
+// Pdef(\hat, ~live[\hat].value).play;
+// )
+
+// -- Probabilistic skips (sparse hi-hat) -------------------------------------
+// (
+// ~live[\hat] = {
+//     Pbind(
+//         \instrument, \hat,
+//         \dur, 1/4,
+//         \amp, Pfunc({
+//             var a = if(0.6.coin, { rrand(0.1, 0.25) }, { 0 });
+//             ~push.(\hat, (instrument: \hat, dur: 0.25, amp: a, rel: 0.05, hp: 7000));
+//             a
+//         }),
+//         \rel, 0.05,
+//         \hp,  7000,
+//     )
+// };
+// Pdef(\hat, ~live[\hat].value).play;
+// )
+
+
+// ══════════════════════════════════════════════════════════════════════════════
+// PING  (voice5)
+// ══════════════════════════════════════════════════════════════════════════════
+
+// -- Sparse coincidence, random pitch (default) -------------------------------
 (
 ~live[\ping] = {
     Pbind(
@@ -108,3 +250,37 @@ Pdef(\hat, ~live[\hat].value).play;
 Pdef(\ping, ~live[\ping].value).play;
 "[rhythm] ping loaded".postln;
 )
+
+// -- Melodic phrase (looped sequence) -----------------------------------------
+// (
+// ~live[\ping] = {
+//     Pbind(
+//         \instrument, \ping,
+//         \dur, Pseq(#[2, 1, 1, 2, 2], inf),
+//         \freq, Pseq(#[440, 550, 495, 330, 660], inf),
+//         \rel, 0.4,
+//         \amp, 0.28,
+//     )
+// };
+// Pdef(\ping, ~live[\ping].value).play;
+// )
+
+// -- Random walk (drifting melody) --------------------------------------------
+// (
+// ~pingNote = 60;
+// ~live[\ping] = {
+//     Pbind(
+//         \instrument, \ping,
+//         \dur, Pwhite(1.0, 4.0),
+//         \freq, Pfunc({
+//             ~pingNote = (~pingNote + #[-2,-1,0,1,2].choose).clip(48, 84);
+//             var f = ~pingNote.midicps;
+//             ~push.(\ping, (instrument: \ping, dur: 2, freq: f, rel: 0.4, amp: 0.28));
+//             f
+//         }),
+//         \rel, 0.4,
+//         \amp, 0.28,
+//     )
+// };
+// Pdef(\ping, ~live[\ping].value).play;
+// )
